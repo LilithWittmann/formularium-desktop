@@ -1,26 +1,62 @@
 'use strict'
 
-import { app, protocol, BrowserWindow } from 'electron'
+import { app, protocol, BrowserWindow, ipcMain} from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
+const { session } = require('electron')
+const path = require("path");
+const fs = require("fs");
+
+const i18nextBackend = require("i18next-electron-fs-backend");
+const Store = require("secure-electron-store").default;
+const ContextMenu = require("secure-electron-context-menu").default;
+
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } }
-])
+]);
 
 async function createWindow() {
+
+   const store = new Store({
+    path: app.getPath("userData")
+  });
+   // Use saved config values for configuring your
+  // BrowserWindow, for instance.
+  // NOTE - this config is not passcode protected
+  // and stores plaintext values
+  //let savedConfig = store.mainInitialStore(fs);
+
   // Create the browser window.
   const win = new BrowserWindow({
     width: 800,
     height: 600,
-    webPreferences: {
-      // Use pluginOptions.nodeIntegration, leave this alone
-      // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
-      nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION
-    }
-  })
+        nodeIntegration: false,
+        contextIsolation: true,
+        enableRemoteModule: false,
+        sandbox: true,
+         webPreferences: {
+          nodeIntegration: false, // is default value after Electron v5
+          contextIsolation: true, // protect against prototype pollution
+          enableRemoteModule: false, // turn off remote
+          preload: path.join(__dirname, 'preload.js'),
+           additionalArguments: [`storePath:${app.getPath("userData")}`],
+        }
+  });
+
+    // Sets up main.js bindings for our i18next backend
+  i18nextBackend.mainBindings(ipcMain, win, fs);
+
+  // Sets up main.js bindings for our electron store;
+  // callback is optional and allows you to use store in main process
+  const callback = function (success, initialStore) {
+    console.log(`${!success ? "Un-s" : "S"}uccessfully retrieved store in main process.`);
+    console.log(initialStore); // {"key1": "value1", ... }
+  };
+
+  store.mainBindings(ipcMain, win, fs, callback);
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
@@ -60,6 +96,25 @@ app.on('ready', async () => {
       console.error('Vue Devtools failed to install:', e.toString())
     }
   }
+  session
+  .fromPartition('some-partition')
+  .setPermissionRequestHandler((webContents, permission, callback) => {
+    const url = webContents.getURL()
+
+    if (permission === 'notifications') {
+      // Approves the permissions request
+      callback(true)
+    }
+
+    // Verify URL
+    // #TODO: find a way to let user configure their backend
+    if (!url.startsWith('https://formulariumapi.verdrusssache.de/')) {
+      // Denies the permissions request
+      return callback(false)
+    }
+  });
+
+
   createWindow()
 })
 
