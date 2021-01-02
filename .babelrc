@@ -35,5 +35,5 @@
       ]
     }
   },
-  "plugins": ["transform-runtime"]
+  "plugins": ["@babel/transform-runtime"]
 }

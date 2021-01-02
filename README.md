@@ -1,5 +1,6 @@
 # formularium-desktop
 
+Electron based formularium desktop client.
 ## Project setup
 ```
 npm install
@@ -7,12 +8,24 @@ npm install
 
 ### Compiles and hot-reloads for development
 ```
-npm run serve
+npm run electron:serve
+
 ```
 
 ### Compiles and minifies for production
 ```
-npm run build
+npm run electron:build
+
+```
+
+### Run your unit tests
+```
+npm run test:unit
+```
+
+### Run your end-to-end tests
+```
+npm run test:e2e
 ```
 
 ### Lints and fixes files
