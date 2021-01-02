@@ -7,7 +7,7 @@ module.exports = {
   },
     pluginOptions: {
     electronBuilder: {
-        preload: { preload: 'src/preload.js', secureKeytar: 'src/secureKeytar.js' },
+        preload: { preload: 'src/preload.js' },
         chainWebpackRendererProcess: config => {
                 config.module
                     .rule('node-loader')
@@ -22,5 +22,8 @@ module.exports = {
             },
         externals: ['keytar'],
     }
-  }
+  },
+  "transpileDependencies": [
+    "vuetify"
+  ]
 };

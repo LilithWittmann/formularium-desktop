@@ -17,8 +17,7 @@ export default {
     HelloWorld
   },
   data() {
-    window.electron.doThing();
-    return {"key": "d"}
+      return {"key": "d"}
   },
 
 }
