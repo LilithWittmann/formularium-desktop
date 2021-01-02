@@ -8,14 +8,14 @@
 import Login from "./views/setup/Login";
 
 export default {
-  name: 'App',
+  name: "App",
 
   components: {
-    Login,
+    Login
   },
 
   data: () => ({
     //
-  }),
+  })
 };
 </script>
