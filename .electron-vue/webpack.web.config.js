@@ -25,10 +25,13 @@ let webConfig = {
         use: {
           loader: 'eslint-loader',
           options: {
-            formatter: require('eslint-friendly-formatter')
+            formatter: require('prettier-eslint')
           }
         }
       },
+        new StyleLintPlugin({
+      files: ['**/*.{vue,htm,html,css,sss,less,scss,sass}'],
+    }),
       {
         test: /\.s(c|a)ss$/,
         use: [

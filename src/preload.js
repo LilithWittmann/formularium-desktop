@@ -1,4 +1,3 @@
-const path = require("path");
 const { contextBridge, ipcRenderer } = require("electron");
 const fs = require("fs");
 const i18nextBackend = require("i18next-electron-fs-backend");
@@ -12,6 +11,7 @@ const keytar = require('keytar');
 class SecureKeytar {
 
     preloadBindings(ipcRenderer) {
+        console.log(ipcRenderer);
         return {
 
             getPassword(service, account) {

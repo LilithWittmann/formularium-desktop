@@ -1,6 +1,7 @@
 const WorkerPlugin = require('worker-plugin')
 
 module.exports = {
+    lintOnSave: true,
       configureWebpack: {
     plugins: [new WorkerPlugin()],
 
@@ -23,6 +24,7 @@ module.exports = {
         externals: ['keytar'],
     }
   },
+
   "transpileDependencies": [
     "vuetify"
   ]
