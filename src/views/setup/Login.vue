@@ -20,7 +20,7 @@
               block
               rounded
               class=" my-4"
-              @onclick="setupOauth"
+              @click="setupOauth()"
               tile
               large
             >
@@ -42,7 +42,20 @@ export default {
     };
   },
   methods: {
-    setupOauth() {}
+    setupOauth() {
+      window.api.oauth
+        .setupOauth(
+          "https://formulariumapi.verdrusssache.de/oauth",
+          "Xhaz9qWvlFkhXRJEXvvsUMHqWvIcYKIhMg8qdvFL"
+        )
+        .then(result => {
+          console.log(result);
+          window.api.oauth.getToken().then(result => {
+            console.log("TOKEN");
+            console.log(result);
+          });
+        });
+    }
   }
 };
 </script>

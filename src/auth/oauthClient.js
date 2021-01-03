@@ -57,7 +57,7 @@ class OauthClient {
         redirect_uri: this.redirectUri,
         scope: "administrative-staff",
         response_type: AuthorizationRequest.RESPONSE_TYPE_CODE,
-        state: "dd",
+        state: Math.random().toString(36),
         extras: { prompt: "consent", access_type: "offline" }
       },
       new NodeCrypto()
@@ -119,9 +119,8 @@ class OauthClient {
       });
   }
 
-  preloadBindings(ipcRenderer) {
+  preloadBindings() {
     var that = this;
-    console.log(ipcRenderer);
     return {
       requestAuthToken(redirectURI) {
         return that.requestToken(redirectURI);

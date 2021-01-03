@@ -13,14 +13,12 @@ class AuthHandler {
     keytar.setPassword("formularium", "clientID", clientID);
     var that = this;
     return this.oautclient.setupBackend(clientURI, clientID).then(() => {
-      console.log("allla");
       return that.oautclient.requestToken().then(response => {
         keytar.setPassword(
           "formularium",
           "configuration",
           JSON.stringify(that.oautclient.configuration)
         );
-        console.log("all all");
         return response;
       });
     });
@@ -29,32 +27,29 @@ class AuthHandler {
   async refreshToken() {
     // fetch a new refreshToken
     var that = this;
-    Promise.all([
+    return Promise.all([
       keytar.getPassword("formularium", "clientURI"),
       keytar.getPassword("formularium", "clientID"),
       keytar.getPassword("formularium", "refreshToken"),
       keytar.getPassword("formularium", "configuration")
     ]).then(values => {
-      console.log(values);
       that.oautclient.refreshToken = values[2];
       that.oautclient.clientID = values[1];
       that.oautclient.configuration = JSON.parse(values[3]);
 
       return that.oautclient.performWithFreshTokens().then(result => {
-        console.log(that.oautclient.accessTokenResponse);
         return result;
       });
     });
   }
 
-  preloadBindings(ipcRenderer) {
-    console.log(ipcRenderer);
+  preloadBindings() {
     var that = this;
     return {
-      setupOauth(clientURI, clientID) {
+      async setupOauth(clientURI, clientID) {
         return that.setup(clientURI, clientID);
       },
-      getToken() {
+      async getToken() {
         return that.refreshToken();
       }
     };
