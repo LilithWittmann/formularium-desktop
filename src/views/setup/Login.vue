@@ -20,6 +20,7 @@
               block
               rounded
               class=" my-4"
+              @onclick="setupOauth"
               tile
               large
             >
@@ -34,7 +35,15 @@
 
 <script>
 export default {
-  name: "Login"
+  name: "Login",
+  data() {
+    return {
+      instanceURL: ""
+    };
+  },
+  methods: {
+    setupOauth() {}
+  }
 };
 </script>
 
