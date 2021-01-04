@@ -7,9 +7,10 @@ class AuthHandler {
     this.oautclient = new OauthClient();
   }
 
-  async setup(clientURI, clientID) {
+  async setup(clientURI, apiURI, clientID) {
     // initial setup as an oauth client
     keytar.setPassword("formularium", "clientURI", clientURI);
+    keytar.setPassword("formularium", "apiURL", apiURI);
     keytar.setPassword("formularium", "clientID", clientID);
     var that = this;
     return this.oautclient.setupBackend(clientURI, clientID).then(() => {
@@ -46,8 +47,8 @@ class AuthHandler {
   preloadBindings() {
     var that = this;
     return {
-      async setupOauth(clientURI, clientID) {
-        return that.setup(clientURI, clientID);
+      async setupOauth(authURL, apiURL, clientID) {
+        return that.setup(authURL, apiURL, clientID);
       },
       async getToken() {
         return that.refreshToken();
