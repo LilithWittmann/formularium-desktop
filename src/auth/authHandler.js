@@ -44,6 +44,10 @@ class AuthHandler {
     });
   }
 
+  async APIUrl() {
+    return keytar.getPassword("formularium", "apiURL");
+  }
+
   preloadBindings() {
     var that = this;
     return {
@@ -52,6 +56,14 @@ class AuthHandler {
       },
       async getToken() {
         return that.refreshToken();
+      },
+      async getAPIURL() {
+        return that.APIUrl();
+      },
+      async setupDone() {
+        return that.APIUrl().then(values => {
+          return values !== null;
+        });
       }
     };
   }

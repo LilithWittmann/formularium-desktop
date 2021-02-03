@@ -1,26 +1,54 @@
 import Vue from "vue";
 import VueApollo from "vue-apollo";
+import decode from "jwt-decode";
 import {
   createApolloClient,
   restartWebsockets
 } from "vue-cli-plugin-apollo/graphql-client";
+//import { setContext } from "@apollo/client/link/context";
+import { TokenRefreshLink } from "apollo-link-token-refresh";
 
 // Install the vue plugin
 Vue.use(VueApollo);
 
 // Name of the localStorage item
-const AUTH_TOKEN = "apollo-token";
+const AUTH_TOKEN = "authToken";
 
 // Http endpoint
-const httpEndpoint = Vue.prototype.API_URL;
+const tokenRefreshLink = new TokenRefreshLink({
+  accessTokenField: "accessToken",
+  isTokenValidOrUndefined: () => {
+    let token = getAuthToken();
+    console.log(token);
+    if (token === null) {
+      return false;
+    }
+    return !isTokenExpired(token);
+  },
+  fetchAccessToken: () => {
+    console.log("Fetch");
+    return refreshToken();
+  },
+  handleResponse: (operation, accessTokenField) => response => {
+    console.log("accTkn");
+    console.log(accessTokenField);
+    console.log(response.accessToken);
+    return { accessToken: response.accessToken };
+  },
+  handleFetch: accessToken => {
+    console.log("dede");
+    console.log(accessToken);
+    setAuthToken(accessToken);
+  }
+});
 
 // Config
 const defaultOptions = {
   // You can use `https` for secure connection (recommended in production)
-  httpEndpoint,
+  httpEndpoint: "https://formulariumapi.verdrusssache.de/graphql/", // TODO dynamic url
   // You can use `wss` for secure connection (recommended in production)
-  // Use `null` to disable subscriptions
-  wsEndpoint: process.env.VUE_APP_GRAPHQL_WS || "ws://localhost:4000/graphql",
+  // Use `null` to disable subscriptions "ws://localhost:4000/graphql"
+  wsEndpoint: null,
   // LocalStorage token
   tokenName: AUTH_TOKEN,
   // Enable Automatic Query persisting with Apollo Engine
@@ -29,12 +57,12 @@ const defaultOptions = {
   // You need to pass a `wsEndpoint` for this to work
   websocketsOnly: false,
   // Is being rendered on the server?
-  ssr: false
+  ssr: false,
 
   // Override default apollo link
   // note: don't override httpLink here, specify httpLink options in the
   // httpLinkOptions property of defaultOptions.
-  // link: myLink
+  link: tokenRefreshLink
 
   // Override default cache
   // cache: myCache
@@ -105,4 +133,41 @@ export async function onLogout(apolloClient) {
     // eslint-disable-next-line no-console
     console.log("%cError on cache reset (logout)", "color: orange;", e.message);
   }
+}
+
+export function logout() {
+  clearAuthToken();
+}
+
+export function setAuthToken(token) {
+  localStorage.setItem(AUTH_TOKEN, token);
+}
+
+export function getAuthToken() {
+  return localStorage.getItem(AUTH_TOKEN);
+}
+
+export function clearAuthToken() {
+  localStorage.removeItem(AUTH_TOKEN);
+}
+
+export async function refreshToken() {
+  return window.api.oauth.getToken();
+}
+
+function getTokenExpirationDate(encodedToken) {
+  let token = decode(encodedToken);
+  if (!token.exp) {
+    return null;
+  }
+
+  let date = new Date(0);
+  date.setUTCSeconds(token.exp);
+
+  return date;
+}
+
+function isTokenExpired(token) {
+  let expirationDate = getTokenExpirationDate(token);
+  return expirationDate < new Date();
 }

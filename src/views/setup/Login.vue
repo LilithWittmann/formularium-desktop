@@ -98,7 +98,10 @@ export default {
           });
         });
     },
-    start() {}
+    start() {
+      console.log("router?");
+      this.$router.go("Dashboard");
+    }
   }
 };
 </script>

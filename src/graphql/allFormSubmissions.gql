@@ -1,0 +1,17 @@
+{
+  allFormSubmissions {
+    edges {
+      node {
+        id
+        signature
+        submittedAt
+        data
+        form {
+          name
+          description
+          jsCode
+        }
+      }
+    }
+  }
+}
