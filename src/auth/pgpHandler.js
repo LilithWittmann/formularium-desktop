@@ -11,15 +11,26 @@ class PGPClient {
   }
 
   async createNewKeypair(user, passphrase) {
-    let key = await kbpgp.KeyManager.generate_rsa({
-      userid: "Bo Jackson <user@example.com>"
+    const agenerate_rsa = promisify(kbpgp.KeyManager.generate_rsa).bind(kbpgp);
+    let key = await agenerate_rsa({
+      userid: user.name + " <" + user.email + ">"
     });
 
-    return await this.importKey(
-      await key.export_pgp_public(),
-      await key.export_pgp_private(),
-      passphrase
-    );
+    console.log(key);
+
+    const asign = promisify(key.sign).bind(key);
+    const apgp_private = promisify(key.export_pgp_private).bind(key);
+    const apgp_public = promisify(key.export_pgp_public).bind(key);
+
+    await asign({});
+
+    let private_key = await apgp_private({
+      passphrase: passphrase
+    });
+
+    let public_key = await apgp_public({});
+
+    return await this.importKey(public_key, private_key, passphrase);
   }
 
   async loadKey(passphrase) {

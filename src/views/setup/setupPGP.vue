@@ -76,7 +76,7 @@
               </v-container>
             </div>
             <div v-if="showDone" class="justify-center">
-              <h1>PGP-Key created!</h1>
+              <h1>PGP-Key setup done!</h1>
               <p>
                 If you created a new key: Please contact your formularium admin
                 and ask them to approve your newly added key!
@@ -119,7 +119,21 @@ export default {
   },
 
   methods: {
-    createKey() {},
+    createKey() {
+      this.showSpinner = true;
+      this.showConfig = false;
+      let that = this;
+      window.api.pgp
+        .createNewKeypair(
+          { user: "Lilith", email: "mail@lilithwittmann.de" },
+          this.createPassword
+        )
+        .then(function(key) {
+          console.log(key);
+          that.showDone = true;
+          that.showSpinner = false;
+        });
+    },
     importKey() {
       console.log("start import");
       this.showSpinner = true;

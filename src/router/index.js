@@ -42,7 +42,8 @@ router.beforeEach(async (to, from, next) => {
   if (Vue.prototype.API_URL !== undefined) {
     if (window.api.pgp.isKeyActive() !== true) {
       console.log("not active");
-      if (to.name !== "UnlockPGP") next({ name: "UnlockPGP" });
+      if (to.name !== "UnlockPGP" && to.name !== "PGP")
+        next({ name: "UnlockPGP" });
     } else {
       next();
     }
@@ -59,7 +60,8 @@ router.beforeEach(async (to, from, next) => {
       console.log(Vue.prototype.API_URL);
       if (window.api.pgp.isKeyActive() !== true) {
         console.log("not active");
-        if (to.name !== "UnlockPGP") next({ name: "UnlockPGP" });
+        if (to.name !== "UnlockPGP" && to.name !== "PGP")
+          next({ name: "UnlockPGP" });
       }
     } else {
       console.log("redirect to setup");
