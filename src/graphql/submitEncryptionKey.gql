@@ -1,0 +1,10 @@
+mutation($publicKey: String!) {
+  submitEncryptionKey(publicKey: $publicKey ) {
+    success
+    encryptionKey {
+      id
+      active
+    	publicKey
+    }
+  }
+}

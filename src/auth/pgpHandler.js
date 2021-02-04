@@ -99,7 +99,7 @@ class PGPClient {
 
     await this.loadKey(passphrase);
 
-    return this.publicKey;
+    return publicKey;
   }
 
   preloadBindings() {

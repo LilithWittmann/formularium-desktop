@@ -130,8 +130,23 @@ export default {
         )
         .then(function(key) {
           console.log(key);
-          that.showDone = true;
-          that.showSpinner = false;
+          that.$apollo
+            .mutate({
+              // Query
+              mutation: require("../../graphql/submitEncryptionKey.gql"),
+              // Parameters
+              variables: {
+                publicKey: key
+              }
+            })
+            .then(data => {
+              console.log(data);
+              that.showDone = true;
+              that.showSpinner = false;
+            })
+            .catch(error => {
+              console.error(error);
+            });
         });
     },
     importKey() {
