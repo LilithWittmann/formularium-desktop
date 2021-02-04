@@ -123,15 +123,15 @@ export default {
     importKey() {
       console.log("start import");
       this.showSpinner = true;
-      //this.showConfig = false;
+      this.showConfig = false;
       console.log(this.importPassword);
-
+      let that = this;
       window.api.pgp
         .importKey(this.publicKey, this.privateKey, this.importPassword)
         .then(function(key) {
           console.log(key);
-          this.showDone = true;
-          this.showSpinner = false;
+          that.showDone = true;
+          that.showSpinner = false;
         });
     },
     start() {

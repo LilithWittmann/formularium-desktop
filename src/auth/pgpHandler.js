@@ -1,24 +1,23 @@
 // import exsisting pub/priv key and set it up with the key backend
-const openpgp = require("openpgp");
+
+import * as kbpgp from "kbpgp";
 
 const keytar = require("keytar");
+const { promisify } = require("util");
 
 class PGPClient {
   constructor() {
-    this.privateKey = null;
-    this.publicKey = null;
+    this.pgpKey = null;
   }
 
   async createNewKeypair(user, passphrase) {
-    const key = await openpgp.generateKey({
-      userIds: [{ name: user.name, email: user.email }], // you can pass multiple user IDs
-      rsaBits: 4096, // RSA key size
-      passphrase: passphrase // protects the private key
+    let key = await kbpgp.KeyManager.generate_rsa({
+      userid: "Bo Jackson <user@example.com>"
     });
 
     return await this.importKey(
-      key.publicKeyArmored,
-      key.privateKeyArmored,
+      await key.export_pgp_public(),
+      await key.export_pgp_private(),
       passphrase
     );
   }
@@ -28,19 +27,37 @@ class PGPClient {
       "formularium",
       "privateKey"
     );
-    console.log(privateEncryptedKeyStr);
-    let privateEncryptedKey = await openpgp.readArmoredKeys([
-      privateEncryptedKeyStr
-    ]);
-    console.log(privateEncryptedKey);
-    let unlocked = await openpgp.decryptKey({
-      privateKey: privateEncryptedKey,
-      passphrase: passphrase
-    });
-    console.log(unlocked);
-    console.log(unlocked.isDecrypted());
-    this.privateKey = unlocked;
-    this.publicKey = await keytar.getPassword("formularium", "publicKey");
+
+    let that = this;
+
+    await kbpgp.KeyManager.import_from_armored_pgp(
+      {
+        armored: await keytar.getPassword("formularium", "publicKey")
+      },
+      function(err, imported) {
+        imported.merge_pgp_private(
+          {
+            armored: privateEncryptedKeyStr
+          },
+          function(err) {
+            console.log(err);
+            imported.unlock_pgp(
+              {
+                passphrase: passphrase
+              },
+              function(err) {
+                console.log(err);
+                let ring = new kbpgp.keyring.KeyRing();
+                ring.add_key_manager(imported);
+                console.log(ring);
+                that.pgpKey = ring;
+              }
+            );
+          }
+        );
+      }
+    );
+
     return true;
   }
 
@@ -49,18 +66,17 @@ class PGPClient {
   }
 
   isKeyActive() {
-    if (this.privateKey !== null) {
+    if (this.pgpKey !== null) {
       return true;
     }
+    return false;
   }
 
   async decrypt(message) {
-    const plaintext = await openpgp.decrypt({
-      message: await openpgp.readArmoredMessage(message), // parse armored message
-      privateKeys: this.privateKey // for decryption
-    });
-
-    return plaintext;
+    const aunbox = promisify(kbpgp.unbox).bind(kbpgp);
+    let plaintext = await aunbox({ keyfetch: this.pgpKey, armored: message });
+    console.log(plaintext[0].toString());
+    return plaintext[0].toString();
   }
 
   async importKey(publicKey, privateKey, passphrase) {

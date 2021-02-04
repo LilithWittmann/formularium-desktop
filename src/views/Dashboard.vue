@@ -44,7 +44,7 @@
       >
         <h1>{{ submission.form.name }}</h1>
         <br />
-        {{ submission.data }}
+        {{ content }}
       </v-col>
     </v-row>
   </div>
@@ -54,10 +54,21 @@
 export default {
   name: "Dashboard",
   data() {
-    console.log(window.api.pgp.getPublicKey());
     return {
-      selected: 0
+      selected: 0,
+      content: null
     };
+  },
+
+  watch: {
+    selected: function(val) {
+      let that = this;
+      window.api.pgp
+        .decrypt(this.allFormSubmissions.edges[val].node.data)
+        .then(function(message) {
+          that.content = message;
+        });
+    }
   },
 
   apollo: {
