@@ -2,6 +2,7 @@ import Vue from "vue";
 import VueRouter from "vue-router";
 import Dashboard from "../views/Dashboard.vue";
 import Login from "../views/setup/Login";
+import setupPGP from "../views/setup/setupPGP";
 
 Vue.use(VueRouter);
 
@@ -15,6 +16,11 @@ const routes = [
     path: "/setup/login/",
     name: "Login",
     component: Login
+  },
+  {
+    path: "/setup/pgp/",
+    name: "PGP",
+    component: setupPGP
   }
 ];
 

@@ -1,4 +1,5 @@
 import AuthHandler from "./auth/authHandler";
+import PGPClient from "./auth/pgpHandler";
 
 const { contextBridge, ipcRenderer } = require("electron");
 const fs = require("fs");
@@ -9,6 +10,7 @@ const ContextMenu = require("secure-electron-context-menu").default;
 const store = new Store();
 
 const authHandler = new AuthHandler();
+const pgp = new PGPClient();
 
 // Expose protected methods that allow the renderer process to use
 // the ipcRenderer without exposing the entire object
@@ -16,5 +18,6 @@ contextBridge.exposeInMainWorld("api", {
   i18nextElectronBackend: i18nextBackend.preloadBindings(ipcRenderer),
   store: store.preloadBindings(ipcRenderer, fs),
   contextMenu: ContextMenu.preloadBindings(ipcRenderer),
-  oauth: authHandler.preloadBindings(ipcRenderer)
+  oauth: authHandler.preloadBindings(ipcRenderer),
+  pgp: pgp.preloadBindings(ipcRenderer)
 });

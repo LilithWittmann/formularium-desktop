@@ -100,7 +100,7 @@ export default {
     },
     start() {
       console.log("router?");
-      this.$router.go("Dashboard");
+      this.$router.push({ name: "PGP" });
     }
   }
 };

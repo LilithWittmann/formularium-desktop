@@ -54,6 +54,7 @@
 export default {
   name: "Dashboard",
   data() {
+    console.log(window.api.pgp.getPublicKey());
     return {
       selected: 0
     };
