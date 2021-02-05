@@ -123,9 +123,13 @@ export default {
       this.showSpinner = true;
       this.showConfig = false;
       let that = this;
+      console.log(this.me);
       window.api.pgp
         .createNewKeypair(
-          { user: "Lilith", email: "mail@lilithwittmann.de" },
+          {
+            user: this.me.firstName + " " + this.me.lastName,
+            email: this.me.email
+          },
           this.createPassword
         )
         .then(function(key) {
@@ -167,6 +171,13 @@ export default {
       console.log("router?");
       console.log({ name: "Home" });
       this.$router.push({ name: "Dashboard" });
+    }
+  },
+  apollo: {
+    me: {
+      query() {
+        return require("../../graphql/me.gql");
+      }
     }
   }
 };
